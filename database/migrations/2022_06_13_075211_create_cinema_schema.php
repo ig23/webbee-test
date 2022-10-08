@@ -35,7 +35,66 @@ class CreateCinemaSchema extends Migration
      * As a cinema owner I dont want to configure the seating for every show
      */
     public function up()
-    {
+    {   
+
+        Schema::create('user', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->enum('role', ['viewer', 'admin']);
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
+        Schema::create('movies', function($table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->text('description');
+            $table->integer('duration_min');
+            $table->string('type');
+            $table->timestamps();
+        });
+
+        Schema::create('cinema', function($table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->integer('seat_no');
+            $table->timestamps();
+        });
+
+        Schema::create('cinemaMovie', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('movie_id')->constrained('movies');
+            $table->foreignId('cinema_id')->constrained('cinema');
+            $table->dateTime('showTime');
+            $table->float('price');
+            $table->timestamps();
+        });
+
+        Schema::create('seats', function (Blueprint $table) {
+            $table->id();
+            $table->int('seat_no')->constrained('movies');
+            $table->enum('category', ['vip', 'super', 'vip-couple']);
+            $table->foreignId('cinema_id')->constrained('cinema');
+            $table->enum('status', ['available', 'reserve']);
+            $table->timestamps();
+        });
+
+         Schema::create('booking', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('show_id')->constrained('cinemaMovie');
+            $table->foreignId('seat_id')->constrained('seats');
+            $table->foreignId('viewer_id')->constrained('user');
+
+            $table->timestamps();
+        });
+
+
+
+
+
         throw new \Exception('implement in coding task 4, you can ignore this exception if you are just running the initial migrations.');
     }
 
@@ -46,5 +105,6 @@ class CreateCinemaSchema extends Migration
      */
     public function down()
     {
+         Schema::dropIfExists('movies');
     }
 }
